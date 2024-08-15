@@ -40,6 +40,8 @@ public class RobotContainer {
   public final pivotSubsys pivotSubsys = new pivotSubsys();
   public final Superstructure superstructure = new Superstructure(intakeSubsys, shooterSubsys, pivotSubsys, driveSubsys);
   
+  private double _kMaxSpeed = kMaxSpeed, _kMaxAngularRate = kMaxAngularRate;
+
   public RobotContainer() {
     configDefaultCommands();
     configButtonBindings();
@@ -47,16 +49,17 @@ public class RobotContainer {
   }
 
   private void configDefaultCommands() {
-    // driveSubsys
-    //     .setDefaultCommand(driveSubsys.applyRequest(
-    //         () -> driveSubsys.fieldCentricDrive
-    //             .withVelocityX(polarityChooser.getSelected() * xboxController.getLeftY() *
-    //                 _kMaxSpeed)
-    //             .withVelocityY(polarityChooser.getSelected() * xboxController.getLeftX() *
-    //                 _kMaxSpeed)
-    //             .withRotationalRate(-xboxController.getRightX() *
-    //                 _kMaxAngularRate)));
+    driveSubsys
+        .setDefaultCommand(driveSubsys.applyRequest(
+            () -> driveSubsys.fieldCentricDrive
+                .withVelocityX(xboxController.getLeftY() *
+                    _kMaxSpeed)
+                .withVelocityY(xboxController.getLeftX() *
+                    _kMaxSpeed)
+                .withRotationalRate(-xboxController.getRightX() *
+                    _kMaxAngularRate)));
     armSubsys.setDefaultCommand(armSubsys.holdHeights());
+    pivotSubsys.setDefaultCommand(pivotSubsys.holdAngle());
   }
 
 
@@ -87,6 +90,6 @@ public class RobotContainer {
 
     //arm controls
     xboxController.pov(180).onTrue(armSubsys.setHeight(() -> 26.5));
-    xboxController.pov(-180).onTrue(armSubsys.setHeight(() -> 47));
+    xboxController.pov(0).onTrue(armSubsys.setHeight(() -> 47));
   }
 }

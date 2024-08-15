@@ -9,6 +9,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
@@ -35,6 +36,8 @@ public class pivotSubsys extends SubsystemBase{
         public double absoluteOffset = 77;
 
         public boolean bruh;
+
+        public double effort;
 
         public double goalAngle = 90;
         public double direction;
@@ -69,12 +72,15 @@ public class pivotSubsys extends SubsystemBase{
             }
         }
 
-        // public Command getVolts(){
-        //      if(bruh = false){
-        //                     pivotLeader.setVoltage(7)
-        //             }
 
-        // }
+        public Command holdAngle(){
+            return run(() ->{
+            var effort = getffEffort();
+            this.effort = effort;
+
+            pivotLeader.setVoltage(effort);
+             } );
+        }
 
         public double getffEffort() {
             var ffEffort = feedforward.calculate(Units.degreesToRadians(getDegrees()), 0);
@@ -82,41 +88,50 @@ public class pivotSubsys extends SubsystemBase{
             return ffEffort;
         }
 
+
         public Command setPivot(DoubleSupplier angle){
-            return runEnd(() -> {
+            return run(() ->{
                 goalAngle = angle.getAsDouble();
-                while(bruh = false){
-                    pivotLeader.setVoltage(kHighVolts*direction);
+                if(bruh = false){
+                    bruh();
+                } else if (atAngle = false){
+                    runPivotVoltage(() -> 3).until(() -> atAngle);
                 }
-                while(atAngle = false){
-                    pivotLeader.setVoltage(kLowVolts*direction);
-                }
-                   
-            },
-            () -> {
-                var effort = getffEffort();
-                pivotLeader.setVoltage(effort);
             });
         }
 
+        public Command bruh(){
+           return Commands.sequence(
+                runPivotVoltage(() -> 7).until(() -> bruh),
+                runPivotVoltage(() -> 2).until(() -> atAngle)
+           );   
+    }
 
-        // public boolean nearGoalAngle(DoubleSupplier goalAngle){
-        //    double distance = (encoderValue - goalAngle.getAsDouble());
-        //    if (Math.abs(distance) <= 15){
-        //         return false;
-        //    }
-        // }
-        // public Command setAngle(DoubleSupplier angle) {
-        //     return runEnd(() ->{
-        //         boolean bruh = nearGoalAngle(angle);
-        //         if(bruh = false){
-        //             pivotLeader.setVoltage(-kHighVolts);
+        public Command runPivotVoltage(DoubleSupplier voltage){
+            return run(() ->{
+                pivotLeader.setVoltage(voltage.getAsDouble());
+            });
+        }
+
+        //first attempt, was non functional
+        // public Command setPivot(DoubleSupplier angle){
+        //     return runEnd(() -> {
+        //         goalAngle = angle.getAsDouble();
+        //         while(bruh = false){
+        //             pivotLeader.setVoltage(kHighVolts*direction);
         //         }
+        //         while(atAngle = false){
+        //             pivotLeader.setVoltage(kLowVolts*direction);
+        //         }
+                   
         //     },
         //     () -> {
-
+        //         var effort = getffEffort();
+        //         pivotLeader.setVoltage(effort);
         //     });
         // }
+
+
 
         @Override 
         public void periodic(){

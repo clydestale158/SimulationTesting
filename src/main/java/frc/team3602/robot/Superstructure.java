@@ -26,8 +26,9 @@ public class Superstructure {
     public Command shootCmd() {
         return Commands.sequence(
         intakeSubsys.runIntake(() -> 0.6).until(() -> intakeSubsys.hasNote == false),
-        shooterSubsys.stopShooters(),
-         pivotSubsys.setPivot(() -> 10)
+        pivotSubsys.setPivot(() -> 10),
+        shooterSubsys.stopShooters()
+
         );
     }
 
@@ -41,6 +42,7 @@ public class Superstructure {
                 intakeSubsys.runIntake(() -> 0.15).until(() -> intakeSubsys.colorSensor.get()))
         );
     }
+    
     public Command getNote() {
         return Commands.sequence(
             pivotSubsys.setPivot(() -> 9).until(() -> pivotSubsys.atAngle),
