@@ -6,17 +6,23 @@
 
 package frc.team3602.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 //import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.team3602.robot.subsystems.armSubsys;
-import frc.team3602.robot.subsystems.intakeSubsys;
-import frc.team3602.robot.subsystems.shooterSubsys;
-import frc.team3602.robot.subsystems.pivotSubsys;
-import frc.team3602.robot.subsystems.DrivetrainSubsystem;
+import frc.team3602.robot.generated.TunerConstants;
+
 import static frc.team3602.robot.Constants.DrivetrainConstants.*;
+
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+
+import static frc.team3602.robot.Constants.Drivetrain.*;
 
 
 //import frc.team3602.robot.Superstructure;
@@ -25,71 +31,73 @@ import static frc.team3602.robot.Constants.ControllerPortConstants.*;
 
 public class RobotContainer {
   public final CommandXboxController xboxController = new CommandXboxController(kXboxControllerPort);
-  // Autonomous
-  private final DrivetrainSubsystem driveSubsys = new DrivetrainSubsystem(
-      kDrivetrainConstants,
-      xboxController,
-      kFrontLeftModuleConstants,
-      kFrontRightModuleConstants,
-      kBackLeftModuleConstants,
-      kBackRightModuleConstants);
-  SendableChooser<Command> sendableChooser = new SendableChooser<>();
-  public final armSubsys armSubsys = new armSubsys();
-  public final intakeSubsys intakeSubsys = new intakeSubsys();
-  public final shooterSubsys shooterSubsys = new shooterSubsys();
-  public final pivotSubsys pivotSubsys = new pivotSubsys();
-  public final Superstructure superstructure = new Superstructure(intakeSubsys, shooterSubsys, pivotSubsys, driveSubsys);
+  public final CommandJoystick joystick = new CommandJoystick(0);
+  public final CommandJoystick portOneJoystick = new CommandJoystick(1);
+  public final CommandJoystick portTwoJoystick = new CommandJoystick(2);
+
+    private final Drivetrain drivetrain = TunerConstants.DriveTrain;
+
+  public final Simulation simulation = new Simulation();
+  public final VisionSystem visSys = new VisionSystem(() -> drivetrain.getState().Pose);
   
-  private double _kMaxSpeed = kMaxSpeed, _kMaxAngularRate = kMaxAngularRate;
+   private final SwerveRequest.FieldCentric drive =
+      new SwerveRequest.FieldCentric()
+          .withDeadband(Constants.Drivetrain.kMaxSpeed * Constants.Drivetrain.kDeadband)
+          .withRotationalDeadband(
+              Constants.Drivetrain.kMaxAngularRate * Constants.Drivetrain.kDeadband)
+          .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
 
   public RobotContainer() {
     configDefaultCommands();
-    configButtonBindings();
-    configAutonomous();
+    configJoystickBindings();
   }
 
   private void configDefaultCommands() {
-    driveSubsys
-        .setDefaultCommand(driveSubsys.applyRequest(
-            () -> driveSubsys.fieldCentricDrive
-                .withVelocityX(xboxController.getLeftY() *
-                    _kMaxSpeed)
-                .withVelocityY(xboxController.getLeftX() *
-                    _kMaxSpeed)
-                .withRotationalRate(-xboxController.getRightX() *
-                    _kMaxAngularRate)));
-    armSubsys.setDefaultCommand(armSubsys.holdHeights());
-    pivotSubsys.setDefaultCommand(pivotSubsys.holdAngle());
-  }
-
-
-  private void configAutonomous() {
-    SmartDashboard.putData(sendableChooser);
-  }
-
-  public Command getAutonomousCommand() {
-    return sendableChooser.getSelected();
-  }
+   
 
   
-  private void configButtonBindings() {
-
-    //getNote
-    xboxController.a().whileTrue(superstructure.getNote());
-    xboxController.x().whileTrue(superstructure.manuallyGetNote());
-
-    //shooter sequences
-    xboxController.rightBumper().onTrue(superstructure.speakerPrepToShoot());
-    xboxController.rightTrigger().onTrue(superstructure.shootCmd());
-    xboxController.leftBumper().onTrue(superstructure.ampPrepToShoot());
-    xboxController.leftTrigger().onTrue(superstructure.shootCmd());
-
-    //intake forward and reverse
-    xboxController.b().whileTrue(intakeSubsys.runIntake(() -> 0.6));
-    xboxController.y().whileTrue(intakeSubsys.runIntake(() -> -0.6));
-
-    //arm controls
-    xboxController.pov(180).onTrue(armSubsys.setHeight(() -> 26.5));
-    xboxController.pov(0).onTrue(armSubsys.setHeight(() -> 47));
   }
+
+
+    
+  private void configJoystickBindings() {
+
+        joystick.button(1).whileTrue(simulation.testIntake());
+        joystick.button(2).whileTrue(simulation.testShooter());
+        joystick.button(3).whileTrue(simulation.testPivot());
+        joystick.button(4).onTrue(Commands.print("bruh" + simulation.simPivotPos));//.onTrue(simulation.testPivotReverse());
+
+        portOneJoystick.button(1).whileTrue(simulation.testPivotReverse());
+
+
+ drivetrain.setDefaultCommand(
+      drivetrain
+          .applyRequest(
+              () ->
+                  drive
+                      .withVelocityX(-joystick.getRawAxis(0) * Constants.Drivetrain.kMaxSpeed)// .withVelocityX(-controller.getLeftY() * Constants.Drivetrain.kMaxSpeed)
+                      .withVelocityY(-joystick.getRawAxis(1) * Constants.Drivetrain.kMaxSpeed)//.withVelocityY(-controller.getLeftX() * Constants.Drivetrain.kMaxSpeed)
+                      .withRotationalRate(
+                          -portOneJoystick.getRawAxis(1) * Constants.Drivetrain.kMaxAngularRate))
+          .ignoringDisable(true));
+
+  //   //getNote
+  //   joystick.button(0).whileTrue(superstructure.getNote());
+  //   joystick.button(1).whileTrue(superstructure.manuallyGetNote());
+
+  //   //shooter sequences
+  //   portOneJoystick.button(0).onTrue(superstructure.speakerPrepToShoot());
+  //   portOneJoystick.button(1).onTrue(superstructure.shootCmd());
+  //   portOneJoystick.button(2).onTrue(superstructure.ampPrepToShoot());
+  //   portOneJoystick.button(3).onTrue(superstructure.shootCmd());
+
+  //   //intake forward and reverse
+  //   joystick.button(2).whileTrue(intakeSubsys.runIntake(() -> 0.6));
+  //   joystick.button(3).whileTrue(intakeSubsys.runIntake(() -> -0.6));
+
+  //   //arm controls
+  //   portTwoJoystick.button(0).onTrue(armSubsys.setHeight(() -> 26.5));
+  //   portTwoJoystick.button(1).onTrue(armSubsys.setHeight(() -> 47));
+   }
 }

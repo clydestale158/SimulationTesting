@@ -26,9 +26,9 @@ import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Units.*;
+import frc.team3602.robot.generated.TunerConstants;
 
 
-import frc.team3602.robot.subsystems.DrivetrainSubsystem;
 
 public final class Constants {
     //xbox controller port
@@ -70,10 +70,60 @@ public final class Constants {
         public static final int kColorSensorId = 1;
     }
 
-    public final class ShooterConstants {
+    //shooter constants
+  public final class shooterConstants{
+    //motor constants
+    public static final int kTopShooterMotorId = 2;
+    public static final int kBottomShooterMotorId = 3;
 
-    }
+    public static final int kShooterCurrentLimit = 25;
 
+    //conversion factor
+    public static final double kTopConvFactor = (Math.PI * 4.0);
+
+    //PID and feedforward constants
+    public static final double kP = 2.0;
+    public static final double kI = 0.0;
+    public static final double kD = 0.1;
+
+    public static final double kS = 0.0;
+    public static final double kV = 0.0;
+    public static final double kA = 0.0;
+  }
+
+  //pivot constants
+  public final class pivotConstants {
+    //motor constants
+    public static final int kPivotLeaderId = 4;
+    public static final int kPivotFollowerId = 6;
+
+    public static final int kPivotCurrentLimit = 15;
+
+    public static double kPivotConvFactor = 360;
+    public static double kAbsoluteOffset = 0;
+
+    //PID and feedforward constants
+    public static final double kP = 0.35;
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
+
+    public static final double kS = 6.0;
+    public static final double kG = 0.21;
+    public static final double kV = 7.6;
+    public static final double kA = 0.01;
+
+    //avoiding pid constants
+    public static final double kHighVolts = 7;
+    public static final double kLowVolts = 3;
+
+    //other constants
+        //idk why these two wont work :(
+    //public static final Measure<Angle> kInFramePos = Degrees.of(45);
+    //public static final Measure<Angle> kPickupPos = Degrees.of(90);
+
+    public static final double kMaxVelocity = 3; // meters/second 0.15
+    public static final double kMaxAcceleration = 6; //meters/second^2 0.5
+  }
 public final class DrivetrainConstants {
     public static final double kMaxSpeed = 6.0;
     public static final double kMaxAngularRate = Math.PI;
@@ -211,59 +261,17 @@ public final class DrivetrainConstants {
     public static final double GOAL_RANGE_METERS = Units.feetToMeters(3);
   }
 
-  //shooter constants
-  public final class shooterConstants{
-    //motor constants
-    public static final int kTopShooterMotorId = 2;
-    public static final int kBottomShooterMotorId = 3;
-
-    public static final int kShooterCurrentLimit = 25;
-
-    //conversion factor
-    public static final double kTopConvFactor = (Math.PI * 4.0);
-
-    //PID and feedforward constants
-    public static final double kP = 2.0;
-    public static final double kI = 0.0;
-    public static final double kD = 0.1;
-
-    public static final double kS = 0.0;
-    public static final double kV = 0.0;
-    public static final double kA = 0.0;
+  public class Transforms {
+    public static Transform3d robotToCamera =
+        new Transform3d(
+            new Translation3d(0, 0, 0.5), // Centered on the robot, 0.5m up
+            new Rotation3d(0, Math.toRadians(-15), 0)); // Pitched 15 deg up
   }
 
-  //pivot constants
-  public final class pivotConstants {
-    //motor constants
-    public static final int kPivotLeaderId = 4;
-    public static final int kPivotFollowerId = 6;
-
-    public static final int kPivotCurrentLimit = 15;
-
-    public static double kPivotConvFactor = 360;
-    public static double kAbsoluteOffset = 0;
-
-    //PID and feedforward constants
-    public static final double kP = 0.35;
-    public static final double kI = 0.0;
-    public static final double kD = 0.0;
-
-    public static final double kS = 6.0;
-    public static final double kG = 0.21;
-    public static final double kV = 7.6;
-    public static final double kA = 0.01;
-
-    //avoiding pid constants
-    //TODO expirament with different voltages or refer to crescendol code
-    public static final double kHighVolts = 7;
-    public static final double kLowVolts = 3;
-
-    //other constants
-        //idk why these two wont work :(
-    //public static final Measure<Angle> kInFramePos = Degrees.of(45);
-    //public static final Measure<Angle> kPickupPos = Degrees.of(90);
-
-    public static final double kMaxVelocity = 3; // meters/second 0.15
-    public static final double kMaxAcceleration = 6; //meters/second^2 0.5
+   public class Drivetrain {
+    public static double kMaxSpeed = TunerConstants.kSpeedAt12VoltsMps; // m/s
+    public static double kMaxAngularRate = 1.5 * Math.PI; // rad/s
+    public static double kDeadband = 0.1;
   }
+
 }
