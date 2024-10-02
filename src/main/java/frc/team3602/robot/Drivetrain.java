@@ -13,8 +13,13 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
+
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -172,6 +177,9 @@ public class Drivetrain extends SwerveDrivetrain implements Subsystem {
     m_simNotifier.startPeriodic(kSimLoopPeriod);
   }
 
+
+
+
   @Override
   public void periodic() {
     /* Periodically try to apply the operator perspective */
@@ -189,6 +197,9 @@ public class Drivetrain extends SwerveDrivetrain implements Subsystem {
                         : BlueAlliancePerspectiveRotation);
                 hasAppliedOperatorPerspective = true;
               });
+
+
+
     }
   }
 }

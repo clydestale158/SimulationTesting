@@ -17,10 +17,16 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.team3602.robot.generated.TunerConstants;
 
-import static frc.team3602.robot.Constants.DrivetrainConstants.*;
+import frc.team3602.robot.Subsystems._PivotSubsystem;
+import frc.team3602.robot.Subsystems.ShooterSubsystem;
+import frc.team3602.robot.Subsystems.Simulation;
+import frc.team3602.robot.Constants.shooterConstants;
+import frc.team3602.robot.Subsystems.IntakeSubsystem;
+//import static frc.team3602.robot.Constants.DrivetrainConstants.*;
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
 
 import static frc.team3602.robot.Constants.Drivetrain.*;
 
@@ -37,9 +43,14 @@ public class RobotContainer {
 
     private final Drivetrain drivetrain = TunerConstants.DriveTrain;
 
-  public final Simulation simulation = new Simulation();
   public final VisionSystem visSys = new VisionSystem(() -> drivetrain.getState().Pose);
-  
+
+  private final _PivotSubsystem pivotSubsys = new _PivotSubsystem();
+  private final ShooterSubsystem shooterSubsys = new ShooterSubsystem();
+    private final IntakeSubsystem intakeSubsys = new IntakeSubsystem();
+      public final Simulation simulation = new Simulation(intakeSubsys, pivotSubsys, shooterSubsys );
+
+
    private final SwerveRequest.FieldCentric drive =
       new SwerveRequest.FieldCentric()
           .withDeadband(Constants.Drivetrain.kMaxSpeed * Constants.Drivetrain.kDeadband)
@@ -47,14 +58,24 @@ public class RobotContainer {
               Constants.Drivetrain.kMaxAngularRate * Constants.Drivetrain.kDeadband)
           .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
+          private final SendableChooser<Command> autoChooser;
+          private SendableChooser<Double> polarityChooser = new SendableChooser<>();
+
 
   public RobotContainer() {
     configDefaultCommands();
     configJoystickBindings();
+        autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+    SmartDashboard.putData("Drive Polarity", polarityChooser);
+
+    polarityChooser.setDefaultOption("Default", 1.0);
+    polarityChooser.addOption("Positive", 1.0);
+    polarityChooser.addOption("Negative", -1.0);
   }
 
   private void configDefaultCommands() {
-   
+    pivotSubsys.holdAngle();
 
   
   }
@@ -63,12 +84,17 @@ public class RobotContainer {
     
   private void configJoystickBindings() {
 
-        joystick.button(1).whileTrue(simulation.testIntake());
-        joystick.button(2).whileTrue(simulation.testShooter());
-        joystick.button(3).whileTrue(simulation.testPivot());
-        joystick.button(4).onTrue(Commands.print("bruh" + simulation.simPivotPos));//.onTrue(simulation.testPivotReverse());
+        // joystick.button(1).whileTrue(simulation.testIntake());
+        // joystick.button(2).whileTrue(simulation.testShooter());
+        // joystick.button(3).whileTrue(simulation.testPivot());
+        // joystick.button(4).onTrue(Commands.print("bruh" + simulation.simPivotPos));//.onTrue(simulation.testPivotReverse());
 
-        portOneJoystick.button(1).whileTrue(simulation.testPivotReverse());
+        // portOneJoystick.button(1).whileTrue(simulation.testPivotReverse());
+
+    joystick.button(1).onTrue(pivotSubsys.runSetAngle(() -> 85).until(() -> pivotSubsys.isAtPosition));
+        joystick.button(2).onTrue(pivotSubsys.runSetAngle(() -> 15).until(() -> pivotSubsys.isAtPosition));
+    joystick.button(3).whileTrue(shooterSubsys.runShooterSpeed(0.8, 0.8)).onFalse(shooterSubsys.stopShooter());
+        joystick.button(4).whileTrue(intakeSubsys.runIntake(() -> 0.6));
 
 
  drivetrain.setDefaultCommand(
@@ -99,5 +125,11 @@ public class RobotContainer {
   //   //arm controls
   //   portTwoJoystick.button(0).onTrue(armSubsys.setHeight(() -> 26.5));
   //   portTwoJoystick.button(1).onTrue(armSubsys.setHeight(() -> 47));
+
+
    }
+   
+  public Command getAutonomousCommand() {
+    return autoChooser.getSelected();
+  }
 }

@@ -1,0 +1,64 @@
+{
+    "name": "CrescBotChassisCentered",
+    "sourceUrl": "https://cad.onshape.com/documents/aa112feae201601186f28260/w/96eb95c1d3a4506cc1245529/e/391dd417b3c9185535191d42",
+    "rotations": [
+      {
+        "axis":  "x",
+        "degrees": 90
+      },
+      {
+        "axis":  "y",
+        "degrees": 0
+      },
+        {
+        "axis":  "z",
+        "degrees": 90
+      }
+    ],
+
+    "position": [0, 0, 0],
+    "cameras": [
+      {
+        "name": "Front Camera",
+        "rotations": [
+          {
+            "axis": "x",
+            "degrees": 0
+          },
+          {
+            "axis": "y",
+            "degrees": 20
+          },
+          {
+            "axis": "z",
+            "degrees": 0
+          }
+        ],
+        "position": [0.2, 0, 0.8],
+        "resolution": [960, 720],
+        "fov": 100
+      }
+  
+    ],
+    "components": [
+      {
+        "zeroedRotations": [
+          {
+            "axis":  "x",
+            "degrees": 0
+          },
+          {
+            "axis":  "y",
+            "degrees": 0
+          },
+            {
+            "axis":  "z",
+            "degrees": 90
+          }
+        ],
+    
+        "zeroedPosition": [-0.2, 0.5, 0.2]
+
+      }
+    ]
+}

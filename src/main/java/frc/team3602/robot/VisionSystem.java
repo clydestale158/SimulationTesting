@@ -3,6 +3,10 @@ package frc.team3602.robot;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.team3602.robot.Constants;
 import java.io.IOException;
@@ -20,6 +24,7 @@ public class VisionSystem extends SubsystemBase {
   public interface Pose2dSupplier {
     Pose2d getPose2d();
   }
+
 
   public VisionSystem(Pose2dSupplier getSimPose) {
     this.getSimPose = getSimPose;
@@ -49,9 +54,18 @@ public class VisionSystem extends SubsystemBase {
     }
   }
 
+
+
+
   @Override
   public void simulationPeriodic() {
     // Update the vision system with the simulated robot pose
     visionSim.update(getSimPose.getPose2d());
+
+   
+
   }
 }
+
+
+
