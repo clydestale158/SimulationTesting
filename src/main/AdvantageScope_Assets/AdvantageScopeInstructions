@@ -1,0 +1,13 @@
+//Author - Caroline
+
+3D modeling/simulation on Advantage Scope is pretty particular, but here are some steps to take
+
+1) Simulate robot code, open AdvantageScope, then in AdvantageScope(AS), click file -> connect to robot simulation
+2) In AS, open a 3D Field window
+3) Still in AS, click Help -> Show User Assets (It'll automatically open your file explorer)
+4) In the file explorer, find the folder for this code, and then find the folder that contains the models and config. (Here, it's titled "Robot_CrescendoBot".) Copy the folder and go back to the user assets(I like spam clicking the back arrow) and paste it. YOU DO NOT WANT TO USE CUSTOM ASSETS
+5) Back in AS, in the 3D field window, there should be a config in the bottom right. Click on the robot selector, and "CrescendoBot" should be an option. Click on it. 
+6) On the left side, find SmartDashboard, then VisionSystemSim-main, then Sim Field. Drag Robot into 2D Poses. (The robot model should show up)
+7) On the left side, find MyPose. Drag it into 3D Poses. Click the dropdown and select Component (Robot). The pivot model should now move with the 2D mechanism
+
+(Also, I didn't properly configure the pivot model, so it's a little wonky yet)
