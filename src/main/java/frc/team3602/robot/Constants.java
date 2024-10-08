@@ -88,7 +88,7 @@ public final class Constants {
     public static double kAbsoluteOffset = 0;
 
     //PID and feedforward constants
-    public static final double kP = 0.35;
+    public static final double kP = 0.35;//!!!0.35
     public static final double kI = 0.0;
     public static final double kD = 0.0;
 

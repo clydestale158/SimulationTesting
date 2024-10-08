@@ -17,9 +17,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.team3602.robot.generated.TunerConstants;
 
-import frc.team3602.robot.Subsystems._PivotSubsystem;
+import frc.team3602.robot.Subsystems.PivotSubsystem;
 import frc.team3602.robot.Subsystems.ShooterSubsystem;
-import frc.team3602.robot.Subsystems.Simulation;
 import frc.team3602.robot.Constants.shooterConstants;
 import frc.team3602.robot.Subsystems.IntakeSubsystem;
 //import static frc.team3602.robot.Constants.DrivetrainConstants.*;
@@ -39,16 +38,15 @@ public class RobotContainer {
   public final CommandXboxController xboxController = new CommandXboxController(kXboxControllerPort);
   public final CommandJoystick joystick = new CommandJoystick(0);
   public final CommandJoystick portOneJoystick = new CommandJoystick(1);
-  public final CommandJoystick portTwoJoystick = new CommandJoystick(2);
+  //public final CommandJoystick portTwoJoystick = new CommandJoystick(2);
 
     private final Drivetrain drivetrain = TunerConstants.DriveTrain;
 
   public final VisionSystem visSys = new VisionSystem(() -> drivetrain.getState().Pose);
 
-  private final _PivotSubsystem pivotSubsys = new _PivotSubsystem();
   private final ShooterSubsystem shooterSubsys = new ShooterSubsystem();
     private final IntakeSubsystem intakeSubsys = new IntakeSubsystem();
-      public final Simulation simulation = new Simulation(intakeSubsys, pivotSubsys, shooterSubsys );
+  private final PivotSubsystem pivotSubsys = new PivotSubsystem(intakeSubsys, shooterSubsys);
 
 
    private final SwerveRequest.FieldCentric drive =
@@ -65,7 +63,8 @@ public class RobotContainer {
   public RobotContainer() {
     configDefaultCommands();
     configJoystickBindings();
-        autoChooser = AutoBuilder.buildAutoChooser();
+    autoChooser = AutoBuilder.buildAutoChooser();
+
     SmartDashboard.putData("Auto Chooser", autoChooser);
     SmartDashboard.putData("Drive Polarity", polarityChooser);
 
@@ -75,26 +74,19 @@ public class RobotContainer {
   }
 
   private void configDefaultCommands() {
-    pivotSubsys.holdAngle();
-
-  
+    pivotSubsys.simHoldAngle();
   }
 
+  public Command getAutonomousCommand() {
+    return autoChooser.getSelected();
+  }
 
     
   private void configJoystickBindings() {
-
-        // joystick.button(1).whileTrue(simulation.testIntake());
-        // joystick.button(2).whileTrue(simulation.testShooter());
-        // joystick.button(3).whileTrue(simulation.testPivot());
-        // joystick.button(4).onTrue(Commands.print("bruh" + simulation.simPivotPos));//.onTrue(simulation.testPivotReverse());
-
-        // portOneJoystick.button(1).whileTrue(simulation.testPivotReverse());
-
-    joystick.button(1).onTrue(pivotSubsys.runSetAngle(() -> 85).until(() -> pivotSubsys.isAtPosition));
-        joystick.button(2).onTrue(pivotSubsys.runSetAngle(() -> 15).until(() -> pivotSubsys.isAtPosition));
-    joystick.button(3).whileTrue(shooterSubsys.runShooterSpeed(0.8, 0.8)).onFalse(shooterSubsys.stopShooter());
-        joystick.button(4).whileTrue(intakeSubsys.runIntake(() -> 0.6));
+    joystick.button(1).onTrue(pivotSubsys.simRunSetAngle(() -> 85).until(() -> pivotSubsys.simIsAtPosition));
+    joystick.button(2).onTrue(pivotSubsys.simRunSetAngle(() -> 15).until(() -> pivotSubsys.simIsAtPosition));
+    joystick.button(3).whileTrue(shooterSubsys.runShooterSpeed(0.8, 0.8)).onFalse(shooterSubsys.stopMotorsCmd());
+    joystick.button(4).whileTrue(intakeSubsys.runIntake(() -> 0.6));
 
 
  drivetrain.setDefaultCommand(
@@ -122,14 +114,7 @@ public class RobotContainer {
   //   joystick.button(2).whileTrue(intakeSubsys.runIntake(() -> 0.6));
   //   joystick.button(3).whileTrue(intakeSubsys.runIntake(() -> -0.6));
 
-  //   //arm controls
-  //   portTwoJoystick.button(0).onTrue(armSubsys.setHeight(() -> 26.5));
-  //   portTwoJoystick.button(1).onTrue(armSubsys.setHeight(() -> 47));
-
-
    }
    
-  public Command getAutonomousCommand() {
-    return autoChooser.getSelected();
-  }
+
 }

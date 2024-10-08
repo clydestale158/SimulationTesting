@@ -3,23 +3,26 @@
     "Other Devices": {
       "CANCoder (v6)[3]": {
         "header": {
-          "open": true
+          "open": false
         }
       },
       "Pigeon 2 (v6)[1]": {
         "header": {
-          "open": true
+          "open": false
         }
       },
       "Talon FX (v6)[1]/Rotor Sensor": {
         "header": {
-          "open": true
+          "open": false
         }
       },
       "Talon FX (v6)[6]/Rotor Sensor": {
         "header": {
-          "open": true
+          "open": false
         }
+      },
+      "window": {
+        "visible": false
       }
     },
     "Timing": {
@@ -31,19 +34,13 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
-      "/SmartDashboard/Arm Viz": "Mechanism2d",
       "/SmartDashboard/Auto Chooser": "String Chooser",
       "/SmartDashboard/Drive Polarity": "String Chooser",
-      "/SmartDashboard/SendableChooser[0]": "String Chooser",
+      "/SmartDashboard/Pivot Viz": "Mechanism2d",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     },
     "windows": {
-      "/SmartDashboard/Arm Viz": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Auto Chooser": {
+      "/SmartDashboard/Pivot Viz": {
         "window": {
           "visible": true
         }
@@ -63,69 +60,46 @@
   },
   "NetworkTables": {
     "transitory": {
-      "PathPlanner": {
-        "open": true
-      },
       "SmartDashboard": {
         "Arm Viz": {
           "Pivot Root": {
-            "open": true,
+            "open": false,
             "pivot ligament": {
-              "open": true
+              "open": false
             }
           },
           "intake Root": {
-            "open": true
+            "open": false
           },
-          "open": true,
+          "open": false,
           "shooter Root": {
-            "open": true
+            "open": false
           }
         },
         "Auto Chooser": {
-          "open": true,
+          "open": false,
           "string[]##v_/SmartDashboard/Auto Chooser/options": {
-            "open": true
+            "open": false
           }
-        },
-        "open": true
+        }
       },
       "photonvision": {
         "photonvision": {
-          "open": true
+          "open": false
         }
       }
     }
   },
   "NetworkTables Info": {
     "AdvantageScope@1": {
-      "open": true
+      "open": false
     },
     "Clients": {
       "open": true
     },
-    "Connections": {
-      "open": true
-    },
     "Server": {
-      "Publishers": {
-        "open": true
-      },
-      "Subscribers": {
-        "open": true
-      },
       "open": true
     },
     "visible": true
-  },
-  "NetworkTables View": {
-    "visible": false
-  },
-  "Plot": {
-    "Plot <0>": {
-      "window": {
-        "visible": false
-      }
-    }
   }
 }
