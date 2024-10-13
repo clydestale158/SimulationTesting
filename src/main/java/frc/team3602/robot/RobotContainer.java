@@ -74,7 +74,8 @@ public class RobotContainer {
   }
 
   private void configDefaultCommands() {
-    pivotSubsys.simHoldAngle();
+    //pivotSubsys.simHoldAngle();
+   // pivotSubsys.setDefaultCommand(pivotSubsys.simGoingToAngle());
   }
 
   public Command getAutonomousCommand() {
@@ -83,10 +84,17 @@ public class RobotContainer {
 
     
   private void configJoystickBindings() {
-    joystick.button(1).onTrue(pivotSubsys.simRunSetAngle(() -> 85).until(() -> pivotSubsys.simIsAtPosition));
-    joystick.button(2).onTrue(pivotSubsys.simRunSetAngle(() -> 15).until(() -> pivotSubsys.simIsAtPosition));
-    joystick.button(3).whileTrue(shooterSubsys.runShooterSpeed(0.8, 0.8)).onFalse(shooterSubsys.stopMotorsCmd());
-    joystick.button(4).whileTrue(intakeSubsys.runIntake(() -> 0.6));
+    // joystick.button(1).onTrue(pivotSubsys.simRunSetAngle(() -> 85).until(() -> pivotSubsys.simIsAtPosition));
+    // joystick.button(2).onTrue(pivotSubsys.simRunSetAngle(() -> 35).until(() -> pivotSubsys.simIsAtPosition));
+    joystick.button(1).onTrue(pivotSubsys.simSetAngle(85));
+    joystick.button(2).onTrue(pivotSubsys.simSetAngle(35));
+    joystick.button(3).onTrue(pivotSubsys.simSetAngle(5));
+    joystick.button(4).onTrue(pivotSubsys.simSetAngle(110));
+
+
+
+    // joystick.button(3).whileTrue(shooterSubsys.runShooterSpeed(0.8, 0.8)).onFalse(shooterSubsys.stopMotorsCmd());
+    // joystick.button(4).whileTrue(intakeSubsys.runIntake(() -> 0.6));
 
 
  drivetrain.setDefaultCommand(

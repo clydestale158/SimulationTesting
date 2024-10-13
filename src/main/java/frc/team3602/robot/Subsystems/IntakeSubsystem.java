@@ -31,7 +31,7 @@ public class IntakeSubsystem extends SubsystemBase  {
   //@Log
   private double intakeVolts;
 
-  public final CANSparkMax intakeMotor = new CANSparkMax(kIntakeMotorId, MotorType.kBrushless);
+  public CANSparkMax intakeMotor = new CANSparkMax(kIntakeMotorId, MotorType.kBrushless);
 
   // Sensors
   //@Log

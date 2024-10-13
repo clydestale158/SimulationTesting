@@ -60,7 +60,7 @@ public class VisionSystem extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     // Update the vision system with the simulated robot pose
-    visionSim.update(getSimPose.getPose2d());
+   // visionSim.update(getSimPose.getPose2d());
 
    
 
