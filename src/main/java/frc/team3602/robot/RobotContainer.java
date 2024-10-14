@@ -41,12 +41,12 @@ public class RobotContainer {
   //public final CommandJoystick portTwoJoystick = new CommandJoystick(2);
 
     private final Drivetrain drivetrain = TunerConstants.DriveTrain;
-
+  public final Vision vision = new Vision(() -> drivetrain.getState().Pose);
   public final VisionSystem visSys = new VisionSystem(() -> drivetrain.getState().Pose);
 
   private final ShooterSubsystem shooterSubsys = new ShooterSubsystem();
     private final IntakeSubsystem intakeSubsys = new IntakeSubsystem();
-  private final PivotSubsystem pivotSubsys = new PivotSubsystem(intakeSubsys, shooterSubsys);
+  private final PivotSubsystem pivotSubsys = new PivotSubsystem(intakeSubsys, shooterSubsys, vision);
 
 
    private final SwerveRequest.FieldCentric drive =
@@ -74,8 +74,6 @@ public class RobotContainer {
   }
 
   private void configDefaultCommands() {
-    //pivotSubsys.simHoldAngle();
-   // pivotSubsys.setDefaultCommand(pivotSubsys.simGoingToAngle());
   }
 
   public Command getAutonomousCommand() {
@@ -84,13 +82,10 @@ public class RobotContainer {
 
     
   private void configJoystickBindings() {
-    // joystick.button(1).onTrue(pivotSubsys.simRunSetAngle(() -> 85).until(() -> pivotSubsys.simIsAtPosition));
-    // joystick.button(2).onTrue(pivotSubsys.simRunSetAngle(() -> 35).until(() -> pivotSubsys.simIsAtPosition));
-    joystick.button(1).onTrue(pivotSubsys.simSetAngle(85));
-    joystick.button(2).onTrue(pivotSubsys.simSetAngle(35));
-    joystick.button(3).onTrue(pivotSubsys.simSetAngle(5));
-    joystick.button(4).onTrue(pivotSubsys.simSetAngle(110));
-
+    joystick.button(1).onTrue(pivotSubsys.setAngle(5));
+    joystick.button(2).onTrue(pivotSubsys.setAngle(10));
+    joystick.button(3).onTrue(pivotSubsys.setAngle(15));
+    joystick.button(4).onTrue(pivotSubsys.setLerpAngle());
 
 
     // joystick.button(3).whileTrue(shooterSubsys.runShooterSpeed(0.8, 0.8)).onFalse(shooterSubsys.stopMotorsCmd());

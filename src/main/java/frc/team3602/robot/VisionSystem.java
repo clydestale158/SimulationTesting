@@ -14,6 +14,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 public class VisionSystem extends SubsystemBase {
   private final PhotonCamera camera = new PhotonCamera("cameraName");
@@ -37,7 +38,7 @@ public class VisionSystem extends SubsystemBase {
     props.setLatencyStdDevMs(5.0);
 
     // Setup simulated camera
-    PhotonCameraSim cameraSim = new PhotonCameraSim(camera, props);
+     PhotonCameraSim cameraSim = new PhotonCameraSim(camera, props);
     // Draw field wireframe in simulated camera view
     cameraSim.enableDrawWireframe(true);
 
@@ -52,7 +53,21 @@ public class VisionSystem extends SubsystemBase {
     } catch (IOException e) {
       System.err.println(e);
     }
+
+
+  //NEW STUFF, SCARY AHHH
+
+  
+
+ 
   }
+
+
+
+  
+
+
+
 
 
 
@@ -60,10 +75,7 @@ public class VisionSystem extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     // Update the vision system with the simulated robot pose
-   // visionSim.update(getSimPose.getPose2d());
-
-   
-
+   visionSim.update(getSimPose.getPose2d());
   }
 }
 

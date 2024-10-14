@@ -8,9 +8,20 @@ package frc.team3602.robot;
 
 
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
+
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
 import frc.team3602.robot.generated.TunerConstants;
 
 
@@ -88,12 +99,12 @@ public final class Constants {
     public static double kAbsoluteOffset = 0;
 
     //PID and feedforward constants
-    public static final double kP = 0.8;
+    public static final double kP = 0.9; //$.9
     public static final double kI = 0.0;
-    public static final double kD = 0.0;
+    public static final double kD = 0.04;//$.04
 
     public static final double kS = 5.0;
-    public static final double kG = 19;
+    public static final double kG = 18.995;//$ ish 19
     public static final double kV = 0.88;
     public static final double kA = 0.11;
 
@@ -110,29 +121,29 @@ public final class Constants {
     public static final double kMaxAcceleration = 6; //meters/second^2 0.5
   }
 
-  // //vision constants (used in drivetrain subsys)
-  // public final class VisionConstants {
-  //   public static final String kPhotonCameraName = "photonvision";
-  //   public static final String kNoteCameraName = "photon_note";
+  //vision constants (used in old drivetrain subsys)
+  public final class VisionConstants {
+    public static final String kPhotonCameraName = "photonvision";
+    public static final String kNoteCameraName = "photon_note";
 
-  //   // Camera mounted facing forward, half a meter forward of center, half a meter
-  //   // up from center. TODO: Measure this
-  //   public static final Transform3d kRobotToCamera = new Transform3d(new Translation3d(0.5, 0.0, 0.5),
-  //       new Rotation3d(0.0, 0.0, 0.0));
+    // Camera mounted facing forward, half a meter forward of center, half a meter
+    // up from center. TODO: Measure this
+    public static final Transform3d kRobotToCamera = new Transform3d(new Translation3d(0.5, 0.0, 0.5),
+        new Rotation3d(0.0, 0.0, 0.0));
 
-  //   public static final Measure<Distance> kCameraHeight = Inches.of(10.75);
-  //   public static final Measure<Angle> kCameraPitch = Degrees.of(20); //23.5
+    public static final Measure<Distance> kCameraHeight = Inches.of(10.75);
+    public static final Measure<Angle> kCameraPitch = Degrees.of(20); //23.5
 
-  //   public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
-  //   public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
-  //   public static final String PHOTON_CAMERA_NAME = "photonvision";
+    public static final Matrix<N3, N1> kSingleTagStdDevs = VecBuilder.fill(4, 4, 8);
+    public static final Matrix<N3, N1> kMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 1);
+    public static final String PHOTON_CAMERA_NAME = "photonvision";
 
-  //   public static final double CAMERA_HEIGHT_METERS = Units.feetToMeters(1.4375);
-  //   public static final double TARGET_HEIGHT_METERS = Units.inchesToMeters(46.0);
-  //   public static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(0.0);
+    public static final double CAMERA_HEIGHT_METERS = Units.feetToMeters(1.4375);
+    public static final double TARGET_HEIGHT_METERS = Units.inchesToMeters(46.0);
+    public static final double CAMERA_PITCH_RADIANS = Units.degreesToRadians(0.0);
 
-  //   public static final double GOAL_RANGE_METERS = Units.feetToMeters(3);
-  // }
+    public static final double GOAL_RANGE_METERS = Units.feetToMeters(3);
+  }
 
   public class Transforms {
     public static Transform3d robotToCamera =

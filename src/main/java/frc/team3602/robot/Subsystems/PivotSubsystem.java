@@ -18,6 +18,7 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -34,8 +35,9 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.team3602.robot.Vision;
 
- import static frc.team3602.robot.Constants.pivotConstants.*;
+import static frc.team3602.robot.Constants.pivotConstants.*;
 
 // import monologue.Logged;
 // import monologue.Annotations.Log;
@@ -44,6 +46,7 @@ public class PivotSubsystem extends SubsystemBase {
     //subsystems
   private IntakeSubsystem intakeSubsys;
   private ShooterSubsystem shooterSubsys;
+  private Vision vision;
 
   // Motor controllers
   public final CANSparkMax pivotMotor = new CANSparkMax(kPivotLeaderId, MotorType.kBrushless);
@@ -53,13 +56,13 @@ public class PivotSubsystem extends SubsystemBase {
 
   // Encoders
   private final DutyCycleEncoder pivotEncoder = new DutyCycleEncoder(2);
+    private double simPivotEncoder; //"Encoder" 
 
   // Controls
   private final PIDController controller = new PIDController(kP, kI, kD);
   private final ArmFeedforward feedforward = new ArmFeedforward(kS, kG, kV, kA);
 
   //2D MECH sim stuff
-    private double simPivotEncoder; //"Encoder" 
 
     private static final SingleJointedArmSim pivotSim = 
         new SingleJointedArmSim(
@@ -94,7 +97,7 @@ public class PivotSubsystem extends SubsystemBase {
 
 
 
-//random doubles
+//random doubles & booleans
  // @Log
   public boolean isAtPosition, lowLimit, highLimit;
 
@@ -107,26 +110,21 @@ public class PivotSubsystem extends SubsystemBase {
   public double lerpAngle;
   public double absoluteOffset = 77;
 
- // @Log
   public double effort;
 
- // @Log
-  public double ffEffort;
-
- // @Log
-  public double pidEffort;
-    //@Log
+  // @Log
   public double motorOutput, motorOutputTwo;
 
   public double totalEffort;
-  //private final Vision vision = new Vision();
+  public double simTotalEffort;
 
- // public final InterpolatingDoubleTreeMap lerpTable = new InterpolatingDoubleTreeMap();
+ public final InterpolatingDoubleTreeMap lerpTable = new InterpolatingDoubleTreeMap();
 
 
-  public PivotSubsystem(IntakeSubsystem intakeSubsys, ShooterSubsystem shooterSubsys) {
+  public PivotSubsystem(IntakeSubsystem intakeSubsys, ShooterSubsystem shooterSubsys, Vision vision) {
     this.intakeSubsys = intakeSubsys;
     this.shooterSubsys = shooterSubsys;
+    this.vision = vision;
 
     SmartDashboard.putData("Pivot Viz", mech);
 
@@ -138,79 +136,27 @@ public class PivotSubsystem extends SubsystemBase {
   public double getDegrees() {
     return (pivotEncoder.getAbsolutePosition() * 360) - absoluteOffset;
   }
-
-  public boolean atPosition() {
-    var target = angle;
-    var tolerance = 2;
-
-    return ((MathUtil.isNear(target, getDegrees(), tolerance)));
-  }
-
-  private double getEffort() {
-    var ffEffort = feedforward.calculate(Units.degreesToRadians(getDegrees()), 0);
-    var pidEffort = controller.calculate(getDegrees(), angle);
-   
-    this.ffEffort = ffEffort;
-    this.pidEffort = pidEffort;
-
-    return ffEffort + pidEffort;
-  }
-
-
-
-  public Command runSetAngle(DoubleSupplier angleDegrees) {
-    return run(() -> {
-      angle = angleDegrees.getAsDouble();
-
-      var effort = getEffort();
-      this.effort = effort;
-
-      pivotMotor.setVoltage(effort);
-    });
-  }
-
-  public Command holdAngle() {
-    return run(() -> {
-      var effort = getEffort();
-      this.effort = effort;      
-      
-      pivotMotor.setVoltage(effort);
-    });
-  }
-
-
-  //   public double simGetDegrees() {
-  //   return simPivotEncoder * 180 / Math.PI;
-  // }
-
-
-
-  // private double simGetEffort() {
-  //   var ffEffort = feedforward.calculate(Units.degreesToRadians(simGetDegrees()), 0);
-  //   var pidEffort = controller.calculate(simGetDegrees(), angle);
-   
-  //  this.ffEffort = ffEffort;
-  //   this.pidEffort = pidEffort;
-
-  // return ffEffort + pidEffort;
-  // }
-
-
-
  
-
   public double simGetEffort(){
-    return totalEffort = ((feedforward.calculate(simPivotEncoder, 0)) + (controller.calculate(Units.radiansToDegrees(simPivotEncoder), angle)));
+    return simTotalEffort = ((feedforward.calculate(simPivotEncoder, 0)) + (controller.calculate(Units.radiansToDegrees(simPivotEncoder), angle)));
   }
 
-  public Command simSetAngle(double newAngle) {
+    public double getEffort(){
+    return totalEffort = ((feedforward.calculate(encoderValue, 0)) + (controller.calculate(encoderValue, angle)));
+  }
+
+
+  public Command setAngle(double newAngle) {
     return runOnce(() ->{
       angle =  newAngle;
     });
   }
 
-
-
+  public Command setLerpAngle(){
+    return run(() -> {
+      angle = lerpAngle;
+    });
+  }
 
   public Command stopMotors() {
     return runOnce(() -> {
@@ -226,30 +172,34 @@ public class PivotSubsystem extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber("Angle", angle);
     SmartDashboard.putNumber("SimPivotEncoder", Units.radiansToDegrees(simPivotEncoder));
-    SmartDashboard.putNumber("Ffeffort", ffEffort);
-    SmartDashboard.putNumber("PidEffort", pidEffort);
-    SmartDashboard.putNumber("Total Effort", totalEffort);
+   
 
-    totalEffort = simGetEffort();
 
-    pivotMotor.setVoltage(totalEffort);
+    //TODO - change w/ real or sim
+    // totalEffort = getEffort();    
+    simTotalEffort = simGetEffort();
+    //SmartDashboard.putNumber("Total Effort", totalEffort);
+    SmartDashboard.putNumber("Sim Total Effort", simTotalEffort);
+    //pivotMotor.setVoltage(totalEffort);
+    pivotMotor.setVoltage(simTotalEffort);
+    // lerpAngle = lerpTable.get(Units.metersToFeet(vision.getTargetDistance()));
+    lerpAngle = lerpTable.get(Units.metersToFeet(vision.simGetTargetDistance()));
+
+
+
+    encoderValue = getDegrees();  
+    simPivotEncoder = pivotSim.getAngleRads();
+
+
 
     motorOutput = pivotMotor.getAppliedOutput();
     motorOutputTwo = pivotFollower.getAppliedOutput();
 
-    
-    encoderValue = getDegrees();
-
-    isAtPosition = atPosition();    
-
-    //lerpAngle = lerpTable.get(Units.metersToFeet(vision.getTargetDistance()));
-
     lowLimit = lowLimitSwitch.isPressed();
     highLimit = highLimitSwitch.isPressed();
-
-
-    //Sim stuff
     
+
+  //Sim model stuff
     pivotSim.setInput(pivotMotor.getAppliedOutput() /12 );
     pivotSim.update(TimedRobot.kDefaultPeriod);
 
@@ -272,7 +222,6 @@ public class PivotSubsystem extends SubsystemBase {
     intakeRoot.setPosition((0.7 + 0.5 * Math.cos(pivotSim.getAngleRads())), (0.3 + 0.5 * Math.sin(pivotSim.getAngleRads())));
 
     pivotSim.getAngleRads();
-    simPivotEncoder = pivotSim.getAngleRads();
 
     rotation = new Rotation3d(0,( -simPivotEncoder + 90), 0);
     pivotPose  = new Pose3d(0, 0, 0, rotation);
@@ -301,17 +250,17 @@ public class PivotSubsystem extends SubsystemBase {
     pivotMotor.burnFlash();
     pivotFollower.burnFlash();
 
-    // // Interpolation table config
-    // lerpTable.put(4.6, 32.0); // 4.6 feet, 32 degrees
-    // lerpTable.put(6.87, 42.0); // 7.65 feet, 42 degrees
-    // lerpTable.put(8.33,44.0); 
-    // lerpTable.put(9.91,48.0); 
-    // lerpTable.put(10.95, 50.0); // 10.7 feet, 49.75 degrees
-    // lerpTable.put(11.4,51.0); 
-    // lerpTable.put(12.53,50.0 ); 
-    // lerpTable.put(13.47, 51.0); // 13.79 feet, 53 degrees
-    // lerpTable.put(15.24,51.0 ); 
-    // lerpTable.put(16.0, 50.0); // 16.9 feet, 52.5 degrees
+    // Interpolation table config
+    lerpTable.put(4.6, 32.0); // 4.6 feet, 32 degrees
+    lerpTable.put(6.87, 42.0); // 7.65 feet, 42 degrees
+    lerpTable.put(8.33,44.0); 
+    lerpTable.put(9.91,48.0); 
+    lerpTable.put(10.95, 50.0); // 10.7 feet, 49.75 degrees
+    lerpTable.put(11.4,51.0); 
+    lerpTable.put(12.53,50.0 ); 
+    lerpTable.put(13.47, 51.0); // 13.79 feet, 53 degrees
+    lerpTable.put(15.24,51.0 ); 
+    lerpTable.put(16.0, 50.0); // 16.9 feet, 52.5 degrees
 
   }
 }
