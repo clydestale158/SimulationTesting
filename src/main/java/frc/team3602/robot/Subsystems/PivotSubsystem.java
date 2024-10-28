@@ -67,13 +67,13 @@ public class PivotSubsystem extends SubsystemBase {
     private static final SingleJointedArmSim pivotSim = 
         new SingleJointedArmSim(
             DCMotor.getNEO(2),
-             48, SingleJointedArmSim.estimateMOI(0.8, 6.3), 0.6, /*0.14*/ 0.0 , /*1.92*/ 3.0, /*true*/true, /*1.57*/ 0.698);
+             48, SingleJointedArmSim.estimateMOI(0.8, 6.3), 0.6,  0.0 ,  3.0, true, /*1.57*/ 0.698);
     private static final FlywheelSim intakeSim =
-        new FlywheelSim(DCMotor.getNeo550(1), 5, 0.01);
+        new FlywheelSim(DCMotor.getNeo550(1), 5, 0.001);
     private static final FlywheelSim shooterSim = 
-        new FlywheelSim(DCMotor.getNEO(1), 1, 0.05);
+        new FlywheelSim(DCMotor.getNEO(1), 1, 0.005);
     private static final FlywheelSim bottomShooterSim = 
-        new FlywheelSim(DCMotor.getNEO(1), 1, 0.05);
+        new FlywheelSim(DCMotor.getNEO(1), 1, 0.005);
 
     private static final Mechanism2d mech = new Mechanism2d(1, 1);
     private static final MechanismRoot2d pivotRoot = mech.getRoot("Pivot Root", 0.7, 0.3); 
@@ -102,10 +102,11 @@ public class PivotSubsystem extends SubsystemBase {
   public boolean isAtPosition, lowLimit, highLimit;
 
   //@Log
-  public double encoderValue;
+  public double encoderValueDegrees;
+  public double encoderValueRadians;
 
  // @Log
-  public double angle = 40; //84
+  public double angle = 35; //84
  // @Log
   public double lerpAngle;
   public double absoluteOffset = 77;
@@ -136,22 +137,26 @@ public class PivotSubsystem extends SubsystemBase {
   public double getDegrees() {
     return (pivotEncoder.getAbsolutePosition() * 360) - absoluteOffset;
   }
- 
+
   public double simGetEffort(){
     return simTotalEffort = ((feedforward.calculate(simPivotEncoder, 0)) + (controller.calculate(Units.radiansToDegrees(simPivotEncoder), angle)));
   }
 
     public double getEffort(){
-    return totalEffort = ((feedforward.calculate(encoderValue, 0)) + (controller.calculate(encoderValue, angle)));
+    return totalEffort = ((feedforward.calculate(encoderValueRadians, 0)) + (controller.calculate(encoderValueDegrees, angle)));
   }
 
+
+  // /////////TEMPORARY TO SET FFE
+  // public double getEffort(){
+  //   return totalEffort = feedforward.calculate(encoderValueRadians, 0);
+  // }
 
   public Command setAngle(double newAngle) {
     return runOnce(() ->{
       angle =  newAngle;
     });
   }
-
   public Command setLerpAngle(){
     return run(() -> {
       angle = lerpAngle;
@@ -165,29 +170,38 @@ public class PivotSubsystem extends SubsystemBase {
     });
   }
 
-
+// public double bruh(){
+//   if(vision.
+//   return bruh;
+// }
 
 
   @Override
-  public void periodic() {
+public void periodic(){
+
     SmartDashboard.putNumber("Angle", angle);
     SmartDashboard.putNumber("SimPivotEncoder", Units.radiansToDegrees(simPivotEncoder));
-   
+    SmartDashboard.putNumber("intake sim out", intakeSubsys.intakeMotor.getAppliedOutput());
+    SmartDashboard.putNumber("PivotEncoderDegrees", encoderValueDegrees);
+        SmartDashboard.putNumber("PivotEncoderRadians", encoderValueRadians);
+    SmartDashboard.putNumber("PID Effort", controller.calculate(encoderValueDegrees, angle));
+    SmartDashboard.putNumber("FFE Effort", feedforward.calculate(encoderValueRadians, 0));
 
 
     //TODO - change w/ real or sim
-    // totalEffort = getEffort();    
-    simTotalEffort = simGetEffort();
-    //SmartDashboard.putNumber("Total Effort", totalEffort);
-    SmartDashboard.putNumber("Sim Total Effort", simTotalEffort);
-    //pivotMotor.setVoltage(totalEffort);
-    pivotMotor.setVoltage(simTotalEffort);
+    totalEffort = getEffort();    
+    //simTotalEffort = simGetEffort();
+    SmartDashboard.putNumber("Total Effort", totalEffort);
+    //SmartDashboard.putNumber("Sim Total Effort", simTotalEffort);
+    pivotMotor.setVoltage(totalEffort);
+    //pivotMotor.setVoltage(simTotalEffort);
     // lerpAngle = lerpTable.get(Units.metersToFeet(vision.getTargetDistance()));
-    lerpAngle = lerpTable.get(Units.metersToFeet(vision.simGetTargetDistance()));
+    //lerpAngle = lerpTable.get(Units.metersToFeet(vision.simGetTargetDistance()));
 
 
 
-    encoderValue = getDegrees();  
+    encoderValueDegrees = getDegrees(); 
+    encoderValueRadians = Units.degreesToRadians(encoderValueDegrees);
     simPivotEncoder = pivotSim.getAngleRads();
 
 
@@ -226,7 +240,7 @@ public class PivotSubsystem extends SubsystemBase {
     rotation = new Rotation3d(0,( -simPivotEncoder + 90), 0);
     pivotPose  = new Pose3d(0, 0, 0, rotation);
     publisher.set(pivotPose);
-  }
+}
 
 
 

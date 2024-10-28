@@ -19,11 +19,15 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 import java.io.IOException;
 
-
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static edu.wpi.first.units.Units.*;
@@ -37,19 +41,32 @@ public class Vision extends SubsystemBase{
   private final PhotonCamera photonNote = new PhotonCamera(kNoteCameraName);
   private final PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(kFieldLayout,
       PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, photonCamera, kRobotToCamera);
+
+     
           SimCameraProperties props = new SimCameraProperties();
 
-     PhotonCameraSim cameraSim = new PhotonCameraSim(photonCamera, props);
-
+  public PhotonCameraSim cameraSim = new PhotonCameraSim(photonCamera, props);
   private double lastEstimateTimestamp = 0.0;
 
     private final VisionSystemSim visionSim = new VisionSystemSim("main");
   private final Pose2dSupplier getSimPose;
+   private final PhotonPoseEstimator simPhotonPoseEstimator = new PhotonPoseEstimator(kFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, cameraSim.getCamera(), kRobotToCamera);
+    //kFieldLayout,PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, cameraSim.getCamera().getLatestResult(), kRobotToCamera);
+
+  private NetworkTable simPhotonTable;
+
+  StructPublisher<Pose2d> simCameraPosePublisher = NetworkTableInstance.getDefault().getStructTopic("simCameraPose", Pose2d.struct).publish();
+  private Pose2d simCameraPose;
+
+
 
   @FunctionalInterface
   public interface Pose2dSupplier {
     Pose2d getPose2d();
   }
+
+
+
 
 
   public Vision(Pose2dSupplier getSimPose) {
@@ -74,6 +91,18 @@ public class Vision extends SubsystemBase{
       lastEstimateTimestamp = latestTimestamp;
     }
 
+    return visionEstimate;
+  }
+
+    public Optional<EstimatedRobotPose> simGetEstimatedRobotPose() {
+    var visionEstimate = simPhotonPoseEstimator.update();
+    double latestTimestamp = getLatestResult().getTimestampSeconds();
+    boolean newResult = Math.abs(latestTimestamp - lastEstimateTimestamp) > 1e-5;
+
+    if (newResult) {
+      lastEstimateTimestamp = latestTimestamp;
+    }
+    
     return visionEstimate;
   }
 
@@ -135,11 +164,26 @@ public class Vision extends SubsystemBase{
   }
 
 
+public Pose3d blankPose = new Pose3d();
+
+// public Pose3d otherBruh(){
+//   if(simGetEstimatedRobotPose().isEmpty()){
+//     return blankPose;
+//   } else{
+//     return simGetEstimatedRobotPose();
+//   }
+// }
+
 
   @Override
   public void simulationPeriodic() {
     // Update the vision system with the simulated robot pose
    visionSim.update(getSimPose.getPose2d());
+   // Pose3d bruh = otherBruh();
+
+  // Rotation2d rotation = new Rotation2d(bruh.getRotation().getAngle());
+  //  simCameraPose = new Pose2d(bruh.getX(), bruh.getY(), rotation);
+
   }
 
   private void configVision() {

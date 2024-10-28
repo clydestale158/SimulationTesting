@@ -39,6 +39,9 @@ public class Drivetrain extends SwerveDrivetrain implements Subsystem {
   private Notifier m_simNotifier = null;
   private double m_lastSimTime;
 
+
+  private Vision vision;
+
   /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
   private final Rotation2d BlueAlliancePerspectiveRotation = Rotation2d.fromDegrees(0);
   /* Red alliance sees forward as 180 degrees (toward blue alliance wall) */
@@ -55,6 +58,7 @@ public class Drivetrain extends SwerveDrivetrain implements Subsystem {
       new SwerveRequest.SysIdSwerveRotation();
   private final SwerveRequest.SysIdSwerveSteerGains SteerCharacterization =
       new SwerveRequest.SysIdSwerveSteerGains();
+
 
   /* Use one of these sysidroutines for your particular test */
   private SysIdRoutine SysIdRoutineTranslation =
@@ -89,6 +93,9 @@ public class Drivetrain extends SwerveDrivetrain implements Subsystem {
   /* Change this to the sysid routine you want to test */
   private final SysIdRoutine RoutineToApply = SysIdRoutineTranslation;
 
+
+
+
   public Drivetrain(
       SwerveDrivetrainConstants driveTrainConstants,
       double OdometryUpdateFrequency,
@@ -108,6 +115,7 @@ public class Drivetrain extends SwerveDrivetrain implements Subsystem {
       startSimThread();
     }
   }
+
 
   private void configurePathPlanner() {
     double driveBaseRadius = 0;
@@ -144,6 +152,7 @@ public class Drivetrain extends SwerveDrivetrain implements Subsystem {
     return new PathPlannerAuto(pathName);
   }
 
+
   /*
    * Both the sysid commands are specific to one particular sysid routine, change
    * which one you're trying to characterize
@@ -160,6 +169,8 @@ public class Drivetrain extends SwerveDrivetrain implements Subsystem {
     return m_kinematics.toChassisSpeeds(getState().ModuleStates);
   }
 
+
+  
   private void startSimThread() {
     m_lastSimTime = Utils.getCurrentTimeSeconds();
 
@@ -178,6 +189,13 @@ public class Drivetrain extends SwerveDrivetrain implements Subsystem {
   }
 
 
+
+  //NEW STUFF that i could theoretically reference really easily but im not going to lmao
+  // public Command turnTowardNote(){
+  //   return run(() ->{
+  //     vision.
+  //   });
+  // }
 
 
   @Override

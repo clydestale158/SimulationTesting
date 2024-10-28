@@ -134,6 +134,13 @@ public class ShooterSubsystem extends SubsystemBase {
       bottomShooterMotor.set(bottomSpeed);
     });
   }
+  
+  public Command newRunShooter(double topSpeed, double bottomSpeed) {
+    return runOnce(() -> {
+      topShooterMotor.setVoltage(topSpeed * 10);
+      bottomShooterMotor.setVoltage(bottomSpeed * 10);
+    });
+  }
 
   public Command stopMotorsCmd() {
     return runOnce(() -> {
