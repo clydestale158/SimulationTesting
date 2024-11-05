@@ -55,7 +55,7 @@ public class PivotSubsystem extends SubsystemBase {
   private final SparkLimitSwitch highLimitSwitch = pivotMotor.getForwardLimitSwitch(SparkLimitSwitch.Type.kNormallyClosed);
 
   // Encoders
-  private final DutyCycleEncoder pivotEncoder = new DutyCycleEncoder(2);
+    private final DutyCycleEncoder pivotEncoder = new DutyCycleEncoder(2);
     private double simPivotEncoder; //"Encoder" 
 
   // Controls
@@ -106,7 +106,7 @@ public class PivotSubsystem extends SubsystemBase {
   public double encoderValueRadians;
 
  // @Log
-  public double angle = 35; //84
+  public double angle = Units.radiansToDegrees(0.698); //84
  // @Log
   public double lerpAngle;
   public double absoluteOffset = 77;
@@ -183,25 +183,26 @@ public void periodic(){
     SmartDashboard.putNumber("SimPivotEncoder", Units.radiansToDegrees(simPivotEncoder));
     SmartDashboard.putNumber("intake sim out", intakeSubsys.intakeMotor.getAppliedOutput());
     SmartDashboard.putNumber("PivotEncoderDegrees", encoderValueDegrees);
-        SmartDashboard.putNumber("PivotEncoderRadians", encoderValueRadians);
+    SmartDashboard.putNumber("PivotEncoderRadians", encoderValueRadians);
     SmartDashboard.putNumber("PID Effort", controller.calculate(encoderValueDegrees, angle));
     SmartDashboard.putNumber("FFE Effort", feedforward.calculate(encoderValueRadians, 0));
+    SmartDashboard.putNumber("Pivot applied output", pivotMotor.getAppliedOutput());
 
 
     //TODO - change w/ real or sim
     totalEffort = getEffort();    
-    //simTotalEffort = simGetEffort();
-    SmartDashboard.putNumber("Total Effort", totalEffort);
-    //SmartDashboard.putNumber("Sim Total Effort", simTotalEffort);
-    pivotMotor.setVoltage(totalEffort);
-    //pivotMotor.setVoltage(simTotalEffort);
+    simTotalEffort = simGetEffort();
+    //SmartDashboard.putNumber("Total Effort", totalEffort);
+    SmartDashboard.putNumber("Sim Total Effort", simTotalEffort);
+    //pivotMotor.setVoltage(totalEffort);
+    pivotMotor.setVoltage(simTotalEffort);
     // lerpAngle = lerpTable.get(Units.metersToFeet(vision.getTargetDistance()));
-    //lerpAngle = lerpTable.get(Units.metersToFeet(vision.simGetTargetDistance()));
+    lerpAngle = lerpTable.get(Units.metersToFeet(vision.simGetTargetDistance()));
 
 
 
-    encoderValueDegrees = getDegrees(); 
-    encoderValueRadians = Units.degreesToRadians(encoderValueDegrees);
+    //encoderValueDegrees = getDegrees(); 
+    //encoderValueRadians = Units.degreesToRadians(encoderValueDegrees);
     simPivotEncoder = pivotSim.getAngleRads();
 
 
@@ -214,7 +215,7 @@ public void periodic(){
     
 
   //Sim model stuff
-    pivotSim.setInput(pivotMotor.getAppliedOutput() /12 );
+    pivotSim.setInput(pivotMotor.getAppliedOutput()/12);
     pivotSim.update(TimedRobot.kDefaultPeriod);
 
     intakeSim.setInput(intakeSubsys.intakeMotor.getAppliedOutput() / 12);

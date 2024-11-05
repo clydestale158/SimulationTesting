@@ -85,32 +85,32 @@ public class RobotContainer {
 
     
   private void configJoystickBindings() {
-    // joystick.button(1).onTrue(pivotSubsys.setAngle(5));
+    joystick.button(1).onTrue(pivotSubsys.setAngle(5));
     
-    // joystick.button(2).onTrue(pivotSubsys.setLerpAngle());
+    joystick.button(2).onTrue(pivotSubsys.setLerpAngle());
     
 
 
-    joystick.button(3).onTrue(pivotSubsys.setAngle(15));
-    joystick.button(4).onTrue(pivotSubsys.setAngle(25));
-    joystick.button(5).onTrue(pivotSubsys.setAngle(45));
-    joystick.button(6).onTrue(pivotSubsys.setAngle(85));
+    joystick.button(3).onTrue(pivotSubsys.setAngle(35));
+    joystick.button(4).onTrue(pivotSubsys.setAngle(75));
+    // joystick.button(5).onTrue(pivotSubsys.setAngle(45));
+    // joystick.button(6).onTrue(pivotSubsys.setAngle(85));
 
 
     //  joystick.button(3).whileTrue(shooterSubsys.newRunShooter(0.8, 0.8)).onFalse(shooterSubsys.newRunShooter(0.0, 0.0));
     //  joystick.button(4).whileTrue(intakeSubsys.runIntake(() -> 0.6)).onFalse(intakeSubsys.stopIntake());
 
 
-//  drivetrain.setDefaultCommand(
-//       drivetrain
-//           .applyRequest(
-//               () ->
-//                   drive
-//                       .withVelocityX(-joystick.getRawAxis(0) * Constants.Drivetrain.kMaxSpeed)// .withVelocityX(-controller.getLeftY() * Constants.Drivetrain.kMaxSpeed)
-//                       .withVelocityY(-joystick.getRawAxis(1) * Constants.Drivetrain.kMaxSpeed)//.withVelocityY(-controller.getLeftX() * Constants.Drivetrain.kMaxSpeed)
-//                       .withRotationalRate(
-//                           -portOneJoystick.getRawAxis(1) * Constants.Drivetrain.kMaxAngularRate))
-//           .ignoringDisable(true));
+ drivetrain.setDefaultCommand(
+      drivetrain
+          .applyRequest(
+              () ->
+                  drive
+                      .withVelocityX(-joystick.getRawAxis(0) * Constants.Drivetrain.kMaxSpeed)// .withVelocityX(-controller.getLeftY() * Constants.Drivetrain.kMaxSpeed)
+                      .withVelocityY(-joystick.getRawAxis(1) * Constants.Drivetrain.kMaxSpeed)//.withVelocityY(-controller.getLeftX() * Constants.Drivetrain.kMaxSpeed)
+                      .withRotationalRate(
+                          -portOneJoystick.getRawAxis(1) * Constants.Drivetrain.kMaxAngularRate))
+          .ignoringDisable(true));
 
   //   //getNote
   //   joystick.button(0).whileTrue(superstructure.getNote());

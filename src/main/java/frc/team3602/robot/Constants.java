@@ -99,16 +99,16 @@ public final class Constants {
     public static double kAbsoluteOffset = 0;
 
     //PID and feedforward constants
-    public static final double kP = 0.55; //$.9 for sim(RADS) //$0.3 ->$.34 $.4 .55
+    public static final double kP = 0.6; //$.9 for sim(RADS) //$0.3 ->$.34 $.4  -> $$$.55 IRL
     public static final double kI = 0.0;
     public static final double kD = 0.04;//$.04//
 
 
     //FFE NOT ACTUALLY TUNED FOR RADS IRL
     public static final double kS = 5.0;
-    public static final double kG = 0.301;//$ ish 19 //$$$$$18.9995 for sim //$ISH 3 IRL // 2 is too low, 4 too high
-    public static final double kV = 0.88; //.88 for sim -> .28 =better ->.08 better ->.02
-    public static final double kA = 0.11; //.11
+    public static final double kG = 55;//$$$$$18.9995 sim //$ISH 3 IRL 
+    public static final double kV = 0.88; 
+    public static final double kA = 0.11; 
 
     //avoiding pid constants
     public static final double kHighVolts = 7;
