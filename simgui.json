@@ -72,6 +72,27 @@
   },
   "NetworkTables": {
     "transitory": {
+      "CameraPublisher": {
+        "open": true,
+        "photonvision-processed": {
+          "open": true,
+          "string[]##v_/CameraPublisher/photonvision-processed/streams": {
+            "open": true
+          }
+        },
+        "photonvision-raw": {
+          "open": true
+        }
+      },
+      "Shuffleboard": {
+        ".metadata": {
+          "open": true
+        },
+        ".recording": {
+          "open": true
+        },
+        "open": true
+      },
       "SmartDashboard": {
         "Arm Viz": {
           "Pivot Root": {
@@ -89,11 +110,11 @@
           }
         },
         "Auto Chooser": {
-          "open": false,
           "string[]##v_/SmartDashboard/Auto Chooser/options": {
             "open": false
           }
-        }
+        },
+        "open": true
       },
       "photonvision": {
         "photonvision": {

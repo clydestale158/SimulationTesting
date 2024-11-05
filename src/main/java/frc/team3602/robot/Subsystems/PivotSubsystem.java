@@ -201,10 +201,10 @@ public void periodic(){
     //pivotMotor.setVoltage(totalEffort);
     pivotMotor.setVoltage(simTotalEffort);
     // lerpAngle = lerpTable.get(Units.metersToFeet(vision.getTargetDistance()));
-    lerpAngle = lerpTable.get(Units.metersToFeet(vision.simGetTargetDistance()));
+    //lerpAngle = lerpTable.get(Units.metersToFeet(vision.simGetTargetDistance()));
 
-
-
+//TODO - like legit something to do later---- Utils.isSimulation is a boolean, use it
+//!!!!!!!!
     //encoderValueDegrees = getDegrees(); 
     //encoderValueRadians = Units.degreesToRadians(encoderValueDegrees);
     simPivotEncoder = pivotSim.getAngleRads();

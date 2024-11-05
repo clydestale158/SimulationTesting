@@ -15,7 +15,9 @@ import org.photonvision.PhotonUtils;
 import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
+import org.photonvision.simulation.VisionTargetSim;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.estimation.TargetModel;
 import org.photonvision.targeting.PhotonPipelineResult;
 import java.io.IOException;
 
@@ -24,6 +26,8 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -35,28 +39,21 @@ import static edu.wpi.first.units.Units.*;
 import static frc.team3602.robot.Constants.VisionConstants.*;
 
 public class Vision extends SubsystemBase{
-  public final AprilTagFieldLayout kFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
 
-  private final PhotonCamera photonCamera = new PhotonCamera(kPhotonCameraName);
-  private final PhotonCamera photonNote = new PhotonCamera(kNoteCameraName);
-  private final PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(kFieldLayout,
-      PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, photonCamera, kRobotToCamera);
-
-     
-          SimCameraProperties props = new SimCameraProperties();
-
-  public PhotonCameraSim cameraSim = new PhotonCameraSim(photonCamera, props);
+  private final Pose2dSupplier getSimPose;
+ public final AprilTagFieldLayout kFieldLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
+   private final PhotonCamera tagCamera = new PhotonCamera(kPhotonCameraName);
+ private final PhotonPoseEstimator photonPoseEstimator = new PhotonPoseEstimator(kFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, tagCamera, kRobotToCamera);
   private double lastEstimateTimestamp = 0.0;
 
-    private final VisionSystemSim visionSim = new VisionSystemSim("main");
-  private final Pose2dSupplier getSimPose;
-   private final PhotonPoseEstimator simPhotonPoseEstimator = new PhotonPoseEstimator(kFieldLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, cameraSim.getCamera(), kRobotToCamera);
-    //kFieldLayout,PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, cameraSim.getCamera().getLatestResult(), kRobotToCamera);
+  private final VisionSystemSim visionSim = new VisionSystemSim("main");
+  ////private TargetModel targetModel = TargetModel.kAprilTag36h11;
+  ////private Pose3d exampleTargetPose = new Pose3d(16, 4, 2, new Rotation3d(0, 0, Math.PI));
+  ////VisionTargetSim exampleVisionTarget = new VisionTargetSim(exampleTargetPose, targetModel);
+  
+  private SimCameraProperties simProps = new SimCameraProperties();
+  private PhotonCameraSim cameraSim = new PhotonCameraSim(tagCamera, simProps);
 
-  private NetworkTable simPhotonTable;
-
-  StructPublisher<Pose2d> simCameraPosePublisher = NetworkTableInstance.getDefault().getStructTopic("simCameraPose", Pose2d.struct).publish();
-  private Pose2d simCameraPose;
 
 
 
@@ -65,46 +62,71 @@ public class Vision extends SubsystemBase{
     Pose2d getPose2d();
   }
 
-
-
-
-
   public Vision(Pose2dSupplier getSimPose) {
     this.getSimPose = getSimPose;
-    configVision();
+    visionSim.addAprilTags(kFieldLayout);
+    visionSim.addCamera(cameraSim, kRobotToCamera);
+    ////visionSim.addVisionTargets(exampleVisionTarget);
+
+    simProps.setCalibration(640, 480, Rotation2d.fromDegrees(100));
+    simProps.setCalibError(0.25, 0.08);
+    simProps.setFPS(20);
+    simProps.setAvgLatencyMs(35.0);
+    simProps.setLatencyStdDevMs(5);
+
+
+    //Stream is at localhost:1181, Processed stream is at localhost:1182, OR in the CameraServer tab of shuffleboard
+    cameraSim.enableRawStream(true);
+    cameraSim.enableProcessedStream(true);
+    cameraSim.enableDrawWireframe(true);
+
+
+
+
+    // photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
+    //  // Setup simulated camera properties
+    // props.setCalibError(0.25, 0.08);
+    // props.setFPS(20.0);
+    // props.setAvgLatencyMs(35.0);
+    // props.setLatencyStdDevMs(5.0);
+
+    // // Setup simulated camera
+    // // Draw field wireframe in simulated camera view
+    // cameraSim.enableDrawWireframe(true);
+
+    // // Add simulated camera to vision sim
+    // visionSim.addCamera(cameraSim, Constants.Transforms.robotToCamera);
+
+    // // Add AprilTags to vision sim
+    // try {
+    //   AprilTagFieldLayout tagLayout =
+    //       AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
+    //   visionSim.addAprilTags(tagLayout);
+    // } catch (IOException e) {
+    //   System.err.println(e);
+    // }
   }
 
   public PhotonPipelineResult getLatestResult() {
-    return photonCamera.getLatestResult();
+    return tagCamera.getLatestResult();
   }
 
-  public PhotonPipelineResult getNoteResult() {
-    return photonNote.getLatestResult();
+  public Optional<EstimatedRobotPose> getEstimatedRobotPose(Pose2d prevEstimatedRobotPose) {
+    // var visionEstimate = photonPoseEstimator.update();
+    // double latestTimestamp = getLatestResult().getTimestampSeconds();
+    // boolean newResult = Math.abs(latestTimestamp - lastEstimateTimestamp) > 1e-5;
+
+    // if (newResult) {
+    //   lastEstimateTimestamp = latestTimestamp;
+    // }
+    //     return visionEstimate;
+
+
+    photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
+      return photonPoseEstimator.update();
   }
 
-  public Optional<EstimatedRobotPose> getEstimatedRobotPose() {
-    var visionEstimate = photonPoseEstimator.update();
-    double latestTimestamp = getLatestResult().getTimestampSeconds();
-    boolean newResult = Math.abs(latestTimestamp - lastEstimateTimestamp) > 1e-5;
 
-    if (newResult) {
-      lastEstimateTimestamp = latestTimestamp;
-    }
-
-    return visionEstimate;
-  }
-
-    public Optional<EstimatedRobotPose> simGetEstimatedRobotPose() {
-    var visionEstimate = simPhotonPoseEstimator.update();
-    double latestTimestamp = getLatestResult().getTimestampSeconds();
-    boolean newResult = Math.abs(latestTimestamp - lastEstimateTimestamp) > 1e-5;
-
-    if (newResult) {
-      lastEstimateTimestamp = latestTimestamp;
-    }
-    
-    return visionEstimate;
-  }
 
   public double getTargetHeight() {
     double targetHeight;
@@ -154,7 +176,7 @@ public class Vision extends SubsystemBase{
     var simResult = cameraSim.getCamera().getLatestResult();
 
     if (simResult.hasTargets()) {
-      simTargetDistance = PhotonUtils.calculateDistanceToTargetMeters(kCameraHeight.in(Meters), getTargetHeight(),
+      simTargetDistance = PhotonUtils.calculateDistanceToTargetMeters(kCameraHeight.in(Meters), getSimTargetHeight(),
           kCameraPitch.in(Radians), Units.degreesToRadians(simResult.getBestTarget().getPitch()));
     } else {
       simTargetDistance = 0.0;
@@ -162,52 +184,11 @@ public class Vision extends SubsystemBase{
 
     return simTargetDistance;
   }
-
-
-public Pose3d blankPose = new Pose3d();
-
-// public Pose3d otherBruh(){
-//   if(simGetEstimatedRobotPose().isEmpty()){
-//     return blankPose;
-//   } else{
-//     return simGetEstimatedRobotPose();
-//   }
-// }
-
-
+  
   @Override
   public void simulationPeriodic() {
     // Update the vision system with the simulated robot pose
    visionSim.update(getSimPose.getPose2d());
-   // Pose3d bruh = otherBruh();
-
-  // Rotation2d rotation = new Rotation2d(bruh.getRotation().getAngle());
-  //  simCameraPose = new Pose2d(bruh.getX(), bruh.getY(), rotation);
-
-  }
-
-  private void configVision() {
-    photonPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
-     // Setup simulated camera properties
-    props.setCalibError(0.25, 0.08);
-    props.setFPS(20.0);
-    props.setAvgLatencyMs(35.0);
-    props.setLatencyStdDevMs(5.0);
-
-    // Setup simulated camera
-    // Draw field wireframe in simulated camera view
-    cameraSim.enableDrawWireframe(true);
-
-    // Add simulated camera to vision sim
-    visionSim.addCamera(cameraSim, Constants.Transforms.robotToCamera);
-
-    // Add AprilTags to vision sim
-    try {
-      AprilTagFieldLayout tagLayout =
-          AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
-      visionSim.addAprilTags(tagLayout);
-    } catch (IOException e) {
-      System.err.println(e);
-    }
+   visionSim.getDebugField();
   }
 }
