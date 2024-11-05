@@ -62,6 +62,10 @@ public class PivotSubsystem extends SubsystemBase {
   private final PIDController controller = new PIDController(kP, kI, kD);
   private final ArmFeedforward feedforward = new ArmFeedforward(kS, kG, kV, kA);
 
+  //sim controls
+  private final PIDController simController = new PIDController(simKP, simKI, simKD);
+  private final ArmFeedforward simFeedforward = new ArmFeedforward(simKS, simKG, simKV, simKA);
+
   //2D MECH sim stuff
 
     private static final SingleJointedArmSim pivotSim = 
@@ -139,7 +143,7 @@ public class PivotSubsystem extends SubsystemBase {
   }
 
   public double simGetEffort(){
-    return simTotalEffort = ((feedforward.calculate(simPivotEncoder, 0)) + (controller.calculate(Units.radiansToDegrees(simPivotEncoder), angle)));
+    return simTotalEffort = ((simFeedforward.calculate(simPivotEncoder, 0)) + (simController.calculate(Units.radiansToDegrees(simPivotEncoder), angle)));
   }
 
     public double getEffort(){
@@ -190,7 +194,7 @@ public void periodic(){
 
 
     //TODO - change w/ real or sim
-    totalEffort = getEffort();    
+    //totalEffort = getEffort();    
     simTotalEffort = simGetEffort();
     //SmartDashboard.putNumber("Total Effort", totalEffort);
     SmartDashboard.putNumber("Sim Total Effort", simTotalEffort);
